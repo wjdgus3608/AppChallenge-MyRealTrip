@@ -10,7 +10,7 @@ class MainViewModel : ViewModel(){
     var selectedNews=MutableLiveData<NewsItem?>()
     init {
         frgMode.postValue(0)
-        var list=ArrayList<NewsItem>()
+        val list=ArrayList<NewsItem>()
         list.add(NewsItem(0,"title 1","des 1"))
         list.add(NewsItem(0,"title 2","des 2"))
         list.add(NewsItem(0,"title 3","des 3"))

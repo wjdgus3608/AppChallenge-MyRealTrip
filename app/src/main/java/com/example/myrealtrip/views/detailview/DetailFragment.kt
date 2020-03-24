@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.webkit.WebViewClient
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -11,6 +12,7 @@ import com.example.myrealtrip.BR
 import com.example.myrealtrip.R
 import com.example.myrealtrip.databinding.FragmentDetailBinding
 import com.example.myrealtrip.utils.MainViewModel
+import kotlinx.android.synthetic.main.fragment_detail.*
 
 class DetailFragment : Fragment(){
     lateinit var model:MainViewModel
@@ -31,5 +33,9 @@ class DetailFragment : Fragment(){
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
+        detail_webview.settings.javaScriptEnabled=true
+        detail_webview.settings.loadWithOverviewMode=true
+        detail_webview.webViewClient= WebViewClient()
+        detail_webview.loadUrl(model.selectedNews.value!!.url)
     }
 }

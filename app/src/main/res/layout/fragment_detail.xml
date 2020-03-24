@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:app="http://schemas.android.com/apk/res-auto">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
     <data>
         <variable
             name="vm"
             type="com.example.myrealtrip.utils.MainViewModel" />
     </data>
 
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    <LinearLayout
         android:orientation="vertical" android:layout_width="match_parent"
         android:layout_height="match_parent">
 
@@ -23,8 +24,42 @@
                 android:gravity="center"
                 android:textStyle="bold"
                 />
-        </com.google.android.material.appbar.AppBarLayout>
 
+        </com.google.android.material.appbar.AppBarLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:padding="20dp">
+
+        <TextView
+            android:id="@+id/detail_title"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:text="@{vm.selectedNews.title}"
+            android:textStyle="bold"
+            android:textSize="20sp"
+            android:maxLines="2"
+            android:ellipsize="end"/>
+
+        <com.google.android.material.chip.ChipGroup
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            >
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="keyword"/>
+        </com.google.android.material.chip.ChipGroup>
+
+        <WebView
+            android:id="@+id/detail_webview"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            />
+        </LinearLayout>
 
     </LinearLayout>
 </layout>

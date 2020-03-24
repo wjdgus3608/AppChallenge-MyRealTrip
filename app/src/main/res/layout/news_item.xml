@@ -30,12 +30,16 @@
                 android:layout_width="match_parent"
                 android:layout_height="40dp"
                 android:text="title"
-                android:textStyle="bold"/>
+                android:textStyle="bold"
+                android:maxLines="1"
+                android:ellipsize="end"/>
             <TextView
                 android:id="@+id/news_des"
                 android:layout_width="match_parent"
                 android:layout_height="80dp"
-                android:text="text"/>
+                android:text="text"
+                android:maxLines="2"
+                android:ellipsize="end"/>
 
             <com.google.android.material.chip.ChipGroup
                 android:id="@+id/keyword_container"
