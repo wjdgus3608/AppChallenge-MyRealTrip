@@ -1,6 +1,8 @@
 package com.example.myrealtrip.views.listview
 
+import android.util.Log
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
@@ -31,14 +33,17 @@ class NewsAdapter(parentModel:MainViewModel) :RecyclerView.Adapter<NewsAdapter.N
             newsTitle.text=item.title
             newsDes.text=item.des
         }}
-        holder.itemView.setOnClickListener { View.OnClickListener {
-            model.selectedNews.postValue(mList.value!![position])
-            model.frgMode.postValue(1)
-        }}
+        holder.itemView.setOnTouchListener(object :View.OnTouchListener{
+            override fun onTouch(v: View?, event: MotionEvent?): Boolean {
+                model.selectedNews.postValue(mList.value!![position])
+                model.frgMode.postValue(1)
+                return false
+            }
+        })
     }
     inner class NewsViewHolder(binding:NewsItemBinding):RecyclerView.ViewHolder(binding.root){
         val newsTitle=itemView.news_title
         val newsDes=itemView.news_des
-//        val keywordContainer=itemView.keyword_container
+        val keywordContainer=itemView.keyword_container
     }
 }
