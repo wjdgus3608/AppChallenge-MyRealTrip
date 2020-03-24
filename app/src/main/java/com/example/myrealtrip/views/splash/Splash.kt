@@ -1,17 +1,11 @@
-package com.example.myrealtrip
+package com.example.myrealtrip.views.splash
 
-import android.app.Activity
-import android.content.Context
 import android.os.Bundle
 import android.content.Intent
-import androidx.core.content.ContextCompat.getSystemService
-import android.icu.lang.UCharacter.GraphemeClusterBreak.T
 import android.os.Handler
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat.startActivity
-
-
-
+import com.example.myrealtrip.R
+import com.example.myrealtrip.views.main.MainActivity
 
 class Splash :AppCompatActivity(){
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -27,7 +21,8 @@ class Splash :AppCompatActivity(){
 
     inner class SplashHandler : Runnable{
         override fun run() {
-            startActivity(Intent(this@Splash,MainActivity::class.java))
+            startActivity(Intent(this@Splash,
+                MainActivity::class.java))
             this@Splash.finish()
         }
     }
