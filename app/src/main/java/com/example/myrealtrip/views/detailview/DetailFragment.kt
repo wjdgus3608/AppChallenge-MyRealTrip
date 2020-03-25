@@ -12,6 +12,7 @@ import com.example.myrealtrip.BR
 import com.example.myrealtrip.R
 import com.example.myrealtrip.databinding.FragmentDetailBinding
 import com.example.myrealtrip.utils.MainViewModel
+import com.google.android.material.chip.Chip
 import kotlinx.android.synthetic.main.fragment_detail.*
 
 class DetailFragment : Fragment(){
@@ -33,6 +34,12 @@ class DetailFragment : Fragment(){
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
+        val keywords=model.selectedNews.value!!.keywords
+        keywords!!.map {
+            val chip= Chip(this.context)
+            chip.text=it
+            detail_keywords.addView(chip)
+        }
         detail_webview.settings.javaScriptEnabled=true
         detail_webview.settings.loadWithOverviewMode=true
         detail_webview.webViewClient= WebViewClient()

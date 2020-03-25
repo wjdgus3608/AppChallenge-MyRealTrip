@@ -1,7 +1,6 @@
-package com.example.myrealtrip.utils.RssUtil
+package com.example.myrealtrip.utils.rssutil
 
 import android.util.Log
-import com.example.myrealtrip.model.NewsItem
 import com.example.myrealtrip.utils.MainViewModel
 import java.io.IOException
 import java.io.InputStream
@@ -12,26 +11,24 @@ class RssConnector(url:String,parentModel: MainViewModel):Thread(){
     val mUrl= URL(url)
     val model=parentModel
     override fun run() {
-        super.run()
         val connect = mUrl.openConnection() as HttpURLConnection
-        connect.readTimeout = 8000
-        connect.connectTimeout = 8000
+        connect.readTimeout = 10000
+        connect.connectTimeout = 10000
         connect.requestMethod = "GET"
         connect.connect()
 
         val responseCode: Int = connect.responseCode
         Log.e("log","$responseCode")
-        var newsList:ArrayList<NewsItem>? = null
         if(responseCode == 200){
-            var stream:InputStream=connect.inputStream
+            val stream:InputStream=connect.inputStream
             try {
-                newsList = RssParser.parse(stream)
+                RssParser.parse(stream,model)
             }
             catch (e: IOException){
                 e.printStackTrace()
             }
         }
-        Log.e("log","list size : ${newsList?.size}")
-        model.mList.postValue(newsList)
+        model.isRefreshing.postValue(false)
     }
+
 }

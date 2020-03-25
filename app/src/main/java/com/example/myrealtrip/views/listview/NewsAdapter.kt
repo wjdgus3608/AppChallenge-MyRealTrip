@@ -9,10 +9,12 @@ import androidx.databinding.DataBindingUtil
 import androidx.databinding.library.baseAdapters.BR
 import androidx.lifecycle.MutableLiveData
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.example.myrealtrip.R
 import com.example.myrealtrip.databinding.NewsItemBinding
 import com.example.myrealtrip.model.NewsItem
 import com.example.myrealtrip.utils.MainViewModel
+import com.google.android.material.chip.Chip
 import kotlinx.android.synthetic.main.news_item.view.*
 
 class NewsAdapter(parentModel:MainViewModel) :RecyclerView.Adapter<NewsAdapter.NewsViewHolder>(){
@@ -26,24 +28,36 @@ class NewsAdapter(parentModel:MainViewModel) :RecyclerView.Adapter<NewsAdapter.N
         return NewsViewHolder(binding)
     }
 
-    override fun getItemCount(): Int = mList.value!!.size
+    override fun getItemCount(): Int {
+        if(mList.value==null) return 0
+        else return mList.value!!.size
+    }
 
     override fun onBindViewHolder(holder: NewsAdapter.NewsViewHolder, position: Int) {
         mList.value!![position].let { item -> with(holder){
             newsTitle.text=item.title
             newsDes.text=item.des
-        }}
-        holder.itemView.setOnTouchListener(object :View.OnTouchListener{
-            override fun onTouch(v: View?, event: MotionEvent?): Boolean {
-                model.selectedNews.postValue(mList.value!![position])
-                model.frgMode.postValue(1)
-                return false
+            Glide.with(holder.itemView).load(item.img).into(newsImg)
+            item.keywords?.map {
+                val chip=Chip(holder.itemView.context)
+                chip.text=it
+                keywordContainer.addView(chip)
             }
-        })
+        }}
     }
     inner class NewsViewHolder(binding:NewsItemBinding):RecyclerView.ViewHolder(binding.root){
         val newsTitle=itemView.news_title
         val newsDes=itemView.news_des
+        val newsImg=itemView.news_img
         val keywordContainer=itemView.keyword_container
+        init {
+            itemView.setOnClickListener (object :View.OnClickListener{
+                override fun onClick(v: View?) {
+                    model.selectedNews.postValue(mList.value!![layoutPosition])
+                    model.frgMode.postValue(1)
+                    Log.e("log","$layoutPosition is clicked!")
+                }
+            })
+        }
     }
 }

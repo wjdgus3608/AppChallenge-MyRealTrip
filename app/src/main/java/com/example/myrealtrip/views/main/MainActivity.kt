@@ -29,7 +29,7 @@ class MainActivity : AppCompatActivity() {
         model.frgMode.observe(this, Observer {
             when(it){
                 0->supportFragmentManager.beginTransaction().replace(R.id.frg_container,ListFragment()).commit()
-                1->supportFragmentManager.beginTransaction().replace(R.id.frg_container,DetailFragment()).addToBackStack(null).commit()
+                1->supportFragmentManager.beginTransaction().replace(R.id.frg_container,DetailFragment()).commit()
             }
         })
 
@@ -38,7 +38,7 @@ class MainActivity : AppCompatActivity() {
     override fun onBackPressed() {
         if(model.frgMode.value==1) {
             model.frgMode.postValue(0)
-            super.onBackPressed()
+            model.selectedNews.postValue(null)
         }
         else {
             if (isClickedCurrent) {

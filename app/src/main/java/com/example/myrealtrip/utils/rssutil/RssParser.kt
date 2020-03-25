@@ -1,13 +1,17 @@
-package com.example.myrealtrip.utils.RssUtil
+package com.example.myrealtrip.utils.rssutil
 
 import android.util.Log
 import com.example.myrealtrip.model.NewsItem
+import com.example.myrealtrip.utils.MainViewModel
+import com.example.myrealtrip.utils.keywordutil.KeyWordParser
+import org.jsoup.Jsoup
 import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserFactory
 import java.io.InputStream
+import kotlin.collections.ArrayList
 
 object RssParser {
-    fun parse(stream:InputStream):ArrayList<NewsItem>{
+    fun parse(stream:InputStream,model:MainViewModel){
         var list=ArrayList<NewsItem>()
         val factory=XmlPullParserFactory.newInstance()
         factory.isNamespaceAware=true
@@ -29,9 +33,16 @@ object RssParser {
                 XmlPullParser.TEXT->{text=parser.text}
                 XmlPullParser.END_TAG->{
                     if(tagName.equals("item",true)){
+                        val meta=Jsoup.connect(newsItem!!.url).get().select("meta")
+                        val img=meta.select("[property=og:image]").attr("content")
+                        val des=meta.select("[property=og:description]").attr("content")
+                        Log.e("log",des.toString())
+                        newsItem.img=img.toString()
+                        newsItem.des=des.toString()
+                        newsItem.keywords=KeyWordParser.parseKeyWord(newsItem.des)
                         isItemFound=false
-                        list.add(newsItem!!)
-//                        newsItem=NewsItem()
+                        list.add(newsItem)
+                        model.mList.postValue(list)
                     }
                     else if(isItemFound && tagName.equals("title",true)){
                         newsItem?.title=text
@@ -43,6 +54,5 @@ object RssParser {
             }
             eventType=parser.next()
         }
-        return list
     }
 }
