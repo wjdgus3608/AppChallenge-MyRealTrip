@@ -38,6 +38,7 @@ class NewsAdapter(parentModel:MainViewModel) :RecyclerView.Adapter<NewsAdapter.N
             newsTitle.text=item.title
             newsDes.text=item.des
             Glide.with(holder.itemView).load(item.img).into(newsImg)
+            keywordContainer.removeAllViews()
             item.keywords?.map {
                 val chip=Chip(holder.itemView.context)
                 chip.text=it

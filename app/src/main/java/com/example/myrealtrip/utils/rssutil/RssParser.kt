@@ -12,7 +12,7 @@ import kotlin.collections.ArrayList
 
 object RssParser {
     fun parse(stream:InputStream,model:MainViewModel){
-        var list=ArrayList<NewsItem>()
+        val list=ArrayList<NewsItem>()
         val factory=XmlPullParserFactory.newInstance()
         factory.isNamespaceAware=true
         val parser=factory.newPullParser()

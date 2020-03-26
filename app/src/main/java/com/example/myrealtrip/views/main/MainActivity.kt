@@ -3,14 +3,10 @@ package com.example.myrealtrip.views.main
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
-import android.util.Log
 import android.widget.Toast
 import androidx.databinding.DataBindingUtil
-import androidx.databinding.Observable
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.example.myrealtrip.BR
 import com.example.myrealtrip.utils.MainViewModel
 import com.example.myrealtrip.R
 import com.example.myrealtrip.databinding.ActivityMainBinding
@@ -28,8 +24,8 @@ class MainActivity : AppCompatActivity() {
         binding.setLifecycleOwner { this.lifecycle }
         model.frgMode.observe(this, Observer {
             when(it){
-                0->supportFragmentManager.beginTransaction().replace(R.id.frg_container,ListFragment()).commit()
-                1->supportFragmentManager.beginTransaction().replace(R.id.frg_container,DetailFragment()).commit()
+                0->supportFragmentManager.beginTransaction().setCustomAnimations(R.anim.slide_from_left,R.anim.slide_to_right).replace(R.id.frg_container,ListFragment()).commit()
+                1->supportFragmentManager.beginTransaction().setCustomAnimations(R.anim.slide_from_right,R.anim.slide_to_left).replace(R.id.frg_container,DetailFragment()).commit()
             }
         })
 
