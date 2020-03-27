@@ -11,6 +11,8 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.example.myrealtrip.R
 import com.example.myrealtrip.databinding.FragmentListBinding
@@ -18,6 +20,7 @@ import com.example.myrealtrip.model.NewsItem
 import com.example.myrealtrip.utils.MainViewModel
 import com.example.myrealtrip.utils.rssutil.RssConnector
 import kotlinx.android.synthetic.main.fragment_list.*
+import kotlin.coroutines.resume
 
 class ListFragment :Fragment(){
     lateinit var model:MainViewModel
@@ -44,15 +47,30 @@ class ListFragment :Fragment(){
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        refresh_view.setOnRefreshListener { model.requestData(url) }
-        recycler_view.addItemDecoration(DividerItemDecoration(this.context,LinearLayout.VERTICAL))
-
         model.mList.observe(this, Observer {
             if(it.size==0) model.requestData(url)
             recycler_view.adapter?.notifyDataSetChanged()
         })
-        model.isLoading.observe(this, Observer { refresh_view.isRefreshing=it })
+        model.isLoading.observe(this, Observer {
+            refresh_view.isRefreshing=it
+        })
         Log.e("log","onViewCreated")
+
+        refresh_view.setOnRefreshListener { model.requestData(url) }
+        recycler_view.addItemDecoration(DividerItemDecoration(this.context,LinearLayout.VERTICAL))
+        recycler_view.addOnScrollListener(object :RecyclerView.OnScrollListener(){
+            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                super.onScrollStateChanged(recyclerView, newState)
+                val layoutManager=recyclerView.layoutManager as LinearLayoutManager
+                val itemCnt=layoutManager.itemCount
+                val lastItemIndex=layoutManager.findLastVisibleItemPosition()
+                if(!model.isLoading.value!! && lastItemIndex >= itemCnt-1){
+                    Log.e("log","more load!!")
+                    model.isLoading.postValue(true)
+                    model.continuation.value?.resume("Resumed")
+                }
+            }
+        })
 
     }
 

@@ -1,9 +1,17 @@
 package com.example.myrealtrip.utils
 
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.myrealtrip.model.NewsItem
 import com.example.myrealtrip.utils.rssutil.RssConnector
+import com.example.myrealtrip.utils.rssutil.RssParser
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.isActive
+import kotlin.coroutines.Continuation
+import kotlin.coroutines.suspendCoroutine
 
 class MainViewModel : ViewModel(){
     var frgMode=MutableLiveData<Int>()
@@ -11,6 +19,9 @@ class MainViewModel : ViewModel(){
     var selectedNews=MutableLiveData<NewsItem?>()
     var isLoading=MutableLiveData<Boolean>()
     var isWebViewLoading=MutableLiveData<Boolean>()
+    var continuation=MutableLiveData<Continuation<String>?>()
+    var connectJob:Job?=null
+    var parsingJob:Job?=null
     init {
         frgMode.postValue(0)
         val list=ArrayList<NewsItem>()
@@ -21,8 +32,17 @@ class MainViewModel : ViewModel(){
     }
 
     fun requestData(url:String){
+        parsingJob?.cancel()
+        connectJob?.cancel()
+        parsingJob=null
+        connectJob=null
         isLoading.postValue(true)
-        RssConnector(url,this).start()
+        RssConnector(url,this).startCoroutine()
     }
 
+    suspend fun pauseCoroutine() = suspendCoroutine<String> { continuation.postValue(it) }
+
+    override fun onCleared() {
+        super.onCleared()
+    }
 }

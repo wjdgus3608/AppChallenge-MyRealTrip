@@ -28,7 +28,6 @@ class MainActivity : AppCompatActivity() {
                 1->supportFragmentManager.beginTransaction().setCustomAnimations(R.anim.slide_from_right,R.anim.slide_to_left).replace(R.id.frg_container,DetailFragment()).commit()
             }
         })
-
     }
 
     override fun onBackPressed() {
