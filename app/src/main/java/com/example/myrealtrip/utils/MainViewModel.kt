@@ -9,17 +9,20 @@ class MainViewModel : ViewModel(){
     var frgMode=MutableLiveData<Int>()
     var mList=MutableLiveData<ArrayList<NewsItem>>()
     var selectedNews=MutableLiveData<NewsItem?>()
-    var isRefreshing=MutableLiveData<Boolean>()
+    var isLoading=MutableLiveData<Boolean>()
+    var isWebViewLoading=MutableLiveData<Boolean>()
     init {
         frgMode.postValue(0)
         val list=ArrayList<NewsItem>()
         mList.postValue(list)
         selectedNews.value=null
-        isRefreshing.value=false
+        isLoading.value=false
+        isWebViewLoading.value=false
     }
 
-    fun refreshData(){
-        isRefreshing.postValue(true)
-        RssConnector("https://news.google.com/rss?hl=ko&gl=KR&ceid=KR:ko",this).start()
+    fun requestData(url:String){
+        isLoading.postValue(true)
+        RssConnector(url,this).start()
     }
+
 }

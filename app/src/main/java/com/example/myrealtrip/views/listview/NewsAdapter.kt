@@ -1,20 +1,29 @@
 package com.example.myrealtrip.views.listview
 
+import android.graphics.drawable.Drawable
+import android.text.TextUtils
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
+import android.widget.TextView
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.library.baseAdapters.BR
 import androidx.lifecycle.MutableLiveData
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.DataSource
+import com.bumptech.glide.load.engine.GlideException
+import com.bumptech.glide.request.RequestListener
+import com.bumptech.glide.request.target.Target
 import com.example.myrealtrip.R
 import com.example.myrealtrip.databinding.NewsItemBinding
 import com.example.myrealtrip.model.NewsItem
 import com.example.myrealtrip.utils.MainViewModel
 import com.google.android.material.chip.Chip
+import com.google.android.material.chip.ChipGroup
 import kotlinx.android.synthetic.main.news_item.view.*
 
 class NewsAdapter(parentModel:MainViewModel) :RecyclerView.Adapter<NewsAdapter.NewsViewHolder>(){
@@ -29,15 +38,36 @@ class NewsAdapter(parentModel:MainViewModel) :RecyclerView.Adapter<NewsAdapter.N
     }
 
     override fun getItemCount(): Int {
-        if(mList.value==null) return 0
-        else return mList.value!!.size
+        mList.value?:return 0
+        return mList.value!!.size
     }
 
     override fun onBindViewHolder(holder: NewsAdapter.NewsViewHolder, position: Int) {
         mList.value!![position].let { item -> with(holder){
-            newsTitle.text=item.title
-            newsDes.text=item.des
-            Glide.with(holder.itemView).load(item.img).into(newsImg)
+
+            newsTitle.text = if (item.title.isEmpty()) "타이틀을 불러오는데 실패했습니다." else item.title
+            newsDes.text = if (item.des.isEmpty()) "본문을 불러오는데 실패했습니다." else item.des
+            Glide.with(holder.itemView).load(item.img).listener(object :RequestListener<Drawable>{
+                override fun onLoadFailed(
+                    e: GlideException?,
+                    model: Any?,
+                    target: Target<Drawable>?,
+                    isFirstResource: Boolean
+                ): Boolean {
+                    newsImg.setImageResource(R.drawable.no_picture)
+                    return false
+                }
+                override fun onResourceReady(
+                    resource: Drawable?,
+                    model: Any?,
+                    target: Target<Drawable>?,
+                    dataSource: DataSource?,
+                    isFirstResource: Boolean
+                ): Boolean {
+                    return false
+                }
+            }).into(newsImg)
+
             keywordContainer.removeAllViews()
             item.keywords?.map {
                 val chip=Chip(holder.itemView.context)
@@ -47,10 +77,10 @@ class NewsAdapter(parentModel:MainViewModel) :RecyclerView.Adapter<NewsAdapter.N
         }}
     }
     inner class NewsViewHolder(binding:NewsItemBinding):RecyclerView.ViewHolder(binding.root){
-        val newsTitle=itemView.news_title
-        val newsDes=itemView.news_des
-        val newsImg=itemView.news_img
-        val keywordContainer=itemView.keyword_container
+        val newsTitle:TextView=itemView.news_title
+        val newsDes:TextView=itemView.news_des
+        val newsImg:ImageView=itemView.news_img
+        val keywordContainer:ChipGroup=itemView.keyword_container
         init {
             itemView.setOnClickListener (object :View.OnClickListener{
                 override fun onClick(v: View?) {

@@ -28,7 +28,8 @@ class RssConnector(url:String,parentModel: MainViewModel):Thread(){
                 e.printStackTrace()
             }
         }
-        model.isRefreshing.postValue(false)
+        Log.e("log","background finish!")
+        model.isLoading.postValue(false)
     }
 
 }

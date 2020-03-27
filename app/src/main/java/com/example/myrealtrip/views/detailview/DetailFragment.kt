@@ -1,12 +1,15 @@
 package com.example.myrealtrip.views.detailview
 
+import android.graphics.Bitmap
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.example.myrealtrip.BR
 import com.example.myrealtrip.R
@@ -42,7 +45,21 @@ class DetailFragment : Fragment(){
         }
         detail_webview.settings.javaScriptEnabled=true
         detail_webview.settings.loadWithOverviewMode=true
-        detail_webview.webViewClient= WebViewClient()
+        detail_webview.webViewClient= object :WebViewClient(){
+
+            override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
+                super.onPageStarted(view, url, favicon)
+                model.isWebViewLoading.postValue(true)
+            }
+
+            override fun onPageFinished(view: WebView?, url: String?) {
+                super.onPageFinished(view, url)
+                model.isWebViewLoading.postValue(false)
+            }
+        }
         detail_webview.loadUrl(model.selectedNews.value!!.url)
+        model.isWebViewLoading.observe(this, Observer {
+            detail_loading_view.visibility= if(it) View.VISIBLE else View.INVISIBLE
+        })
     }
 }
