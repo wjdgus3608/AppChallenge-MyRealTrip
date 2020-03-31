@@ -1,23 +1,17 @@
 package com.example.myrealtrip
 
-import androidx.test.espresso.Espresso
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.assertion.ViewAssertions.doesNotExist
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.withId
-import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import androidx.test.filters.LargeTest
 import androidx.test.rule.ActivityTestRule
-import com.example.myrealtrip.views.main.MainActivity
-import com.example.myrealtrip.views.splash.Splash
-import org.hamcrest.CoreMatchers.not
+import com.example.myrealtrip.views.splash.SplashActivity
 
 import org.junit.Test
 import org.junit.runner.RunWith
 
-import org.junit.Assert.*
 import org.junit.Rule
 import java.util.concurrent.TimeUnit
 
@@ -28,10 +22,10 @@ import java.util.concurrent.TimeUnit
  */
 @RunWith(AndroidJUnit4::class)
 //스플래시 UI 테스트
-class SplashActivityUiTest {
+class SplashActivityActivityUiTest {
     @Rule
     @JvmField
-    var activityRule = ActivityTestRule(Splash::class.java)
+    var activityRule = ActivityTestRule(SplashActivity::class.java)
 
     @Test
     //스플래시 화면 1.3초간만 보이기

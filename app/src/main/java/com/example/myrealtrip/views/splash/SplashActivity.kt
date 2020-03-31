@@ -7,7 +7,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.myrealtrip.R
 import com.example.myrealtrip.views.main.MainActivity
 
-class Splash :AppCompatActivity(){
+class SplashActivity :AppCompatActivity(){
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_splash)
@@ -21,9 +21,9 @@ class Splash :AppCompatActivity(){
 
     inner class SplashHandler : Runnable{
         override fun run() {
-            startActivity(Intent(this@Splash,
+            startActivity(Intent(this@SplashActivity,
                 MainActivity::class.java))
-            this@Splash.finish()
+            this@SplashActivity.finish()
         }
     }
 }

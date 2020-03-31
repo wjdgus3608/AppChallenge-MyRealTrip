@@ -1,4 +1,4 @@
-package com.example.myrealtrip.utils
+package com.example.myrealtrip.viewmodel
 
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
@@ -10,31 +10,26 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.isActive
+import java.util.*
+import kotlin.collections.ArrayList
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.suspendCoroutine
 
 class MainViewModel : ViewModel(){
-    var frgMode=MutableLiveData<Int>()
-    var mList=MutableLiveData<ArrayList<NewsItem>>()
-    var selectedNews=MutableLiveData<NewsItem?>()
-    var isLoading=MutableLiveData<Boolean>()
-    var isWebViewLoading=MutableLiveData<Boolean>()
+    var frgMode=MutableLiveData(0)
+    var mList=MutableLiveData<Vector<NewsItem>>(Vector())
+    var selectedNews=MutableLiveData<NewsItem?>(null)
+    var isLoading=MutableLiveData(false)
+    var isWebViewLoading=MutableLiveData(false)
     var continuation=MutableLiveData<Continuation<String>?>()
     var connectJob:Job?=null
-    var parsingJob:Job?=null
-    init {
-        frgMode.postValue(0)
-        val list=ArrayList<NewsItem>()
-        mList.postValue(list)
-        selectedNews.value=null
-        isLoading.value=false
-        isWebViewLoading.value=false
-    }
+    var parsingJob=Vector<Job>()
+    var isDataEnd=MutableLiveData(false)
 
     fun requestData(url:String){
-        parsingJob?.cancel()
+        isDataEnd.postValue(false)
+        clearParsingJob()
         connectJob?.cancel()
-        parsingJob=null
         connectJob=null
         isLoading.postValue(true)
         RssConnector(url,this).startCoroutine()
@@ -42,7 +37,16 @@ class MainViewModel : ViewModel(){
 
     suspend fun pauseCoroutine() = suspendCoroutine<String> { continuation.postValue(it) }
 
+    fun clearParsingJob(){
+        for(job in parsingJob)
+            job.cancel()
+        parsingJob.clear()
+    }
+
     override fun onCleared() {
         super.onCleared()
+        clearParsingJob()
+        connectJob?.cancel()
+        Log.e("log","ViewModel cleared!")
     }
 }

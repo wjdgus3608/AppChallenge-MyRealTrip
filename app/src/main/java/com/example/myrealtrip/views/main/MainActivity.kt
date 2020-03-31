@@ -7,14 +7,14 @@ import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import com.example.myrealtrip.utils.MainViewModel
+import com.example.myrealtrip.viewmodel.MainViewModel
 import com.example.myrealtrip.R
 import com.example.myrealtrip.databinding.ActivityMainBinding
 import com.example.myrealtrip.views.detailview.DetailFragment
 import com.example.myrealtrip.views.listview.ListFragment
 
 class MainActivity : AppCompatActivity() {
-    lateinit var model:MainViewModel
+    lateinit var model: MainViewModel
     private var isClickedCurrent=false
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -22,6 +22,10 @@ class MainActivity : AppCompatActivity() {
         model=ViewModelProvider(this,ViewModelProvider.NewInstanceFactory()).get(MainViewModel::class.java)
         binding.setVariable(androidx.databinding.library.baseAdapters.BR.vm,model)
         binding.setLifecycleOwner { this.lifecycle }
+    }
+
+    override fun onStart() {
+        super.onStart()
         model.frgMode.observe(this, Observer {
             when(it){
                 0->supportFragmentManager.beginTransaction().setCustomAnimations(R.anim.slide_from_left,R.anim.slide_to_right).replace(R.id.frg_container,ListFragment()).commit()
@@ -44,4 +48,6 @@ class MainActivity : AppCompatActivity() {
             Handler().postDelayed({ isClickedCurrent = false }, 2000)
         }
     }
+
+
 }

@@ -4,7 +4,7 @@
     <data>
         <variable
             name="vm"
-            type="com.example.myrealtrip.utils.MainViewModel" />
+            type="com.example.myrealtrip.viewmodel.MainViewModel" />
     </data>
 
     <LinearLayout

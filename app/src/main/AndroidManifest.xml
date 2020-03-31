@@ -12,7 +12,7 @@
         android:theme="@style/Theme.MaterialComponents.Light.NoActionBar.Bridge"
         android:usesCleartextTraffic="true">
 <!--        <uses-library android:name="org.apache.http.legacy" android:required="false" />-->
-        <activity android:name=".views.splash.Splash">
+        <activity android:name=".views.splash.SplashActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
