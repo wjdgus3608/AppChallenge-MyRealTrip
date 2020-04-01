@@ -8,17 +8,17 @@ import java.io.InputStream
 import java.net.HttpURLConnection
 import java.net.URL
 
-class RssConnector(url:String,parentModel: MainViewModel){
-    private val mUrl= URL(url)
-    val model=parentModel
+class RssConnector(url: String, parentModel: MainViewModel) {
+    private val mUrl = URL(url)
+    val model = parentModel
 
     fun startCoroutine() {
-        model.connectJob=GlobalScope.launch{
+        model.connectJob = GlobalScope.launch {
             doConnect()
         }
     }
 
-     private suspend fun doConnect(){
+    private suspend fun doConnect() {
         val connect = mUrl.openConnection() as HttpURLConnection
         connect.readTimeout = 10000
         connect.connectTimeout = 10000
@@ -26,18 +26,19 @@ class RssConnector(url:String,parentModel: MainViewModel){
         connect.connect()
 
         val responseCode: Int = connect.responseCode
-        Log.e("log","$responseCode")
-        if(responseCode == 200){
-            val stream:InputStream=connect.inputStream
+        Log.d("log", "responseCode : $responseCode")
+
+        if (responseCode == 200) {
+            val stream: InputStream = connect.inputStream
             try {
-                RssParser.parse(stream,model)
-            }
-            catch (e: IOException){
+                RssParser.parse(stream, model)
+            } catch (e: IOException) {
                 e.printStackTrace()
             }
         }
-        Log.e("log","background finish!")
-         model.isDataEnd.postValue(true)
+
+        Log.d("log", "Background Task Finish!")
+        model.isDataEnd.postValue(true)
     }
 
 }

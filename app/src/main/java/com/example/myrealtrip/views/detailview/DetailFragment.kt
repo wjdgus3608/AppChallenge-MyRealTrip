@@ -18,12 +18,16 @@ import com.example.myrealtrip.viewmodel.MainViewModel
 import com.google.android.material.chip.Chip
 import kotlinx.android.synthetic.main.fragment_detail.*
 
-class DetailFragment : Fragment(){
+class DetailFragment : Fragment() {
     lateinit var model: MainViewModel
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        model=ViewModelProvider(activity!!.viewModelStore,ViewModelProvider.NewInstanceFactory()).get(
-            MainViewModel::class.java)
+        model = ViewModelProvider(
+            activity!!.viewModelStore,
+            ViewModelProvider.NewInstanceFactory()
+        ).get(
+            MainViewModel::class.java
+        )
     }
 
     override fun onCreateView(
@@ -31,17 +35,22 @@ class DetailFragment : Fragment(){
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val binding=DataBindingUtil.inflate<FragmentDetailBinding>(inflater,R.layout.fragment_detail,container,false)
-        binding.setVariable(BR.vm,model)
+        val binding = DataBindingUtil.inflate<FragmentDetailBinding>(
+            inflater,
+            R.layout.fragment_detail,
+            container,
+            false
+        )
+        binding.setVariable(BR.vm, model)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        detail_webview.settings.javaScriptEnabled=true
-        detail_webview.settings.loadWithOverviewMode=true
-        detail_webview.webViewClient= object :WebViewClient(){
+        detail_webview.settings.javaScriptEnabled = true
+        detail_webview.settings.loadWithOverviewMode = true
+        detail_webview.webViewClient = object : WebViewClient() {
 
             override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
                 super.onPageStarted(view, url, favicon)
@@ -52,6 +61,7 @@ class DetailFragment : Fragment(){
                 super.onPageFinished(view, url)
                 model.isWebViewLoading.postValue(false)
             }
+
         }
         detail_webview.loadUrl(model.selectedNews.value?.url)
     }
@@ -59,14 +69,14 @@ class DetailFragment : Fragment(){
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        val keywords=model.selectedNews.value?.keywords
+        val keywords = model.selectedNews.value?.keywords
         keywords?.map {
-            val chip= Chip(this.context)
-            chip.text=it
+            val chip = Chip(this.context)
+            chip.text = it
             detail_keywords.addView(chip)
         }
         model.isWebViewLoading.observe(viewLifecycleOwner, Observer {
-            detail_loading_view.visibility= if(it) View.VISIBLE else View.INVISIBLE
+            detail_loading_view.visibility = if (it) View.VISIBLE else View.INVISIBLE
         })
     }
 }
