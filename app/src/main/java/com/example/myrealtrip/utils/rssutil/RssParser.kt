@@ -11,6 +11,7 @@ import kotlinx.coroutines.yield
 import org.jsoup.Jsoup
 import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserFactory
+import java.io.IOException
 import java.io.InputStream
 import java.net.SocketTimeoutException
 import java.security.SecureRandom
@@ -22,8 +23,8 @@ import javax.net.ssl.TrustManager
 import javax.net.ssl.X509TrustManager
 
 object RssParser {
-    private const val loadSize:Int=10
-    suspend fun parse(stream:InputStream,model: MainViewModel) {
+    private const val loadSize: Int = 10
+    suspend fun parse(stream: InputStream, model: MainViewModel) {
         val list = Vector<NewsItem>()
         val factory = XmlPullParserFactory.newInstance()
         factory.isNamespaceAware = true
@@ -39,48 +40,52 @@ object RssParser {
         while (eventType != XmlPullParser.END_DOCUMENT) {
             yield()
             val tagName = parser.name
+
             when (eventType) {
+
                 XmlPullParser.START_TAG -> {
                     if (tagName.equals("item", true)) {
                         isItemFound = true
                         newsItem = NewsItem()
                     }
                 }
-                XmlPullParser.TEXT -> {
-                    text = parser.text
-                }
+
+                XmlPullParser.TEXT -> text = parser.text
+
                 XmlPullParser.END_TAG -> {
                     if (tagName.equals("item", true)) {
-                        if(newsItem.url.isNotEmpty()) {
-                            val url=newsItem.url
-                            val title=newsItem.title
+                        if (newsItem.url.isNotEmpty()) {
+                            val url = newsItem.url
+                            val title = newsItem.title
                             val job = GlobalScope.launch {
                                 try {
                                     val meta =
                                         Jsoup.connect(url).ignoreHttpErrors(true).get()
                                             .select("meta")
                                     val img = meta.select("[property=og:image]").attr("content")
-                                    val des = meta.select("[property=og:description]").attr("content")
-                                    Log.e("log", title)
-                                    val tmpItem=NewsItem()
-                                    tmpItem.title=title
-                                    tmpItem.url=url
+                                    val des =
+                                        meta.select("[property=og:description]").attr("content")
+                                    Log.d("log", "title : $title")
+                                    val tmpItem = NewsItem()
+                                    tmpItem.title = title
+                                    tmpItem.url = url
                                     tmpItem.img = img.toString()
                                     tmpItem.des = des.toString()
                                     tmpItem.keywords = KeyWordParser.parseKeyWord(tmpItem.des)
                                     isItemFound = false
                                     list.add(tmpItem)
+                                    model.mList.postValue(list)
+                                } catch (e: SocketTimeoutException) {
+                                    Log.e("log", "time out at : $url")
                                 }
-                                catch (e:SocketTimeoutException){
-                                    e.printStackTrace()
+                                catch (e:IOException){
+                                    Log.e("log", "$e at : $url")
                                 }
                             }
                             model.parsingJob.add(job)
                             yield()
                             if (model.parsingJob.size == loadSize) {
                                 model.parsingJob.map { joinAll(it) }
-                                Log.e("log","rendering!!")
-                                model.mList.postValue(list)
                                 model.isLoading.postValue(false)
                                 model.pauseCoroutine()
                                 model.clearParsingJob()
@@ -101,7 +106,7 @@ object RssParser {
         model.clearParsingJob()
     }
 
-    fun allSSLTrust(){
+    fun allSSLTrust() {
         val trustAllCerts: Array<TrustManager> =
             arrayOf(object : X509TrustManager {
                 override fun getAcceptedIssuers(): Array<X509Certificate>? {

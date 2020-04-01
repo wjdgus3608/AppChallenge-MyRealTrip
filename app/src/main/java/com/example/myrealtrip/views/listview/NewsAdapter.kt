@@ -2,10 +2,12 @@ package com.example.myrealtrip.views.listview
 
 import android.graphics.drawable.Drawable
 import android.util.Log
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.library.baseAdapters.BR
@@ -25,7 +27,7 @@ import com.google.android.material.chip.ChipGroup
 import kotlinx.android.synthetic.main.news_item.view.*
 import java.util.*
 
-class NewsAdapter(parentModel: MainViewModel) :RecyclerView.Adapter<NewsAdapter.NewsViewHolder>() {
+class NewsAdapter(parentModel: MainViewModel) : RecyclerView.Adapter<NewsAdapter.NewsViewHolder>() {
     var mList = MutableLiveData<Vector<NewsItem>>()
     val model = parentModel
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NewsAdapter.NewsViewHolder {
@@ -38,15 +40,17 @@ class NewsAdapter(parentModel: MainViewModel) :RecyclerView.Adapter<NewsAdapter.
         return NewsViewHolder(binding)
     }
 
-    override fun getItemCount(): Int =  mList.value?.size?:0
+    override fun getItemCount(): Int = mList.value?.size ?: 0
 
     override fun onBindViewHolder(holder: NewsAdapter.NewsViewHolder, position: Int) {
         mList.value?.get(position)?.let { item ->
             with(holder) {
                 newsTitle.text = if (item.title.isEmpty()) "타이틀을 불러오는데 실패했습니다." else item.title
                 newsDes.text = if (item.des.isEmpty()) "본문을 불러오는데 실패했습니다." else item.des
-                if(item.img.isEmpty()) newsImg.setImageResource(R.drawable.no_picture)
-                else {
+                if (item.img.isEmpty()) {
+                    loadingView.visibility = View.GONE
+                    newsImg.setImageResource(R.drawable.no_picture)
+                } else {
                     Glide.with(holder.itemView).load(item.img)
                         .listener(object : RequestListener<Drawable> {
                             override fun onLoadFailed(
@@ -55,6 +59,7 @@ class NewsAdapter(parentModel: MainViewModel) :RecyclerView.Adapter<NewsAdapter.
                                 target: Target<Drawable>?,
                                 isFirstResource: Boolean
                             ): Boolean {
+                                loadingView.visibility = View.GONE
                                 newsImg.setImageResource(R.drawable.no_picture)
                                 return false
                             }
@@ -66,6 +71,7 @@ class NewsAdapter(parentModel: MainViewModel) :RecyclerView.Adapter<NewsAdapter.
                                 dataSource: DataSource?,
                                 isFirstResource: Boolean
                             ): Boolean {
+                                loadingView.visibility = View.GONE
                                 return false
                             }
                         }).into(newsImg)
@@ -75,6 +81,8 @@ class NewsAdapter(parentModel: MainViewModel) :RecyclerView.Adapter<NewsAdapter.
                 item.keywords?.map {
                     val chip = Chip(holder.itemView.context)
                     chip.text = it
+                    chip.textAlignment = View.TEXT_ALIGNMENT_CENTER
+                    chip.rippleColor = null
                     keywordContainer.addView(chip)
                 }
             }
@@ -86,12 +94,13 @@ class NewsAdapter(parentModel: MainViewModel) :RecyclerView.Adapter<NewsAdapter.
         val newsDes: TextView = itemView.news_des
         val newsImg: ImageView = itemView.news_img
         val keywordContainer: ChipGroup = itemView.keyword_container
+        val loadingView: ProgressBar = itemView.item_loading_view
 
         init {
-            itemView.setOnClickListener{
-                    model.selectedNews.postValue(mList.value?.get(layoutPosition))
-                    model.frgMode.postValue(1)
-                    Log.e("log", "$layoutPosition is clicked!")
+            itemView.setOnClickListener {
+                model.selectedNews.postValue(mList.value?.get(layoutPosition))
+                model.frgMode.postValue(1)
+                Log.d("log", "$layoutPosition is clicked!")
             }
         }
     }

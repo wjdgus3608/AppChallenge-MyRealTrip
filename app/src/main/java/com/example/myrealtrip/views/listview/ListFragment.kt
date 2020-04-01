@@ -1,5 +1,9 @@
 package com.example.myrealtrip.views.listview
 
+import android.content.Context
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -19,17 +23,20 @@ import com.example.myrealtrip.viewmodel.MainViewModel
 import kotlinx.android.synthetic.main.fragment_list.*
 import kotlin.coroutines.resume
 
-class ListFragment :Fragment(){
+class ListFragment : Fragment() {
     lateinit var model: MainViewModel
-    var isLoading:Boolean=false
-    private val url="https://news.google.com/rss?hl=ko&gl=KR&ceid=KR:ko"
-//    private val url="https://news.google.com/rss"
+    var isLoading: Boolean = false
+    private val url="https://news.google.com/rss"
+    private var isNetworkConnected=false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Log.e("log","onCreate")
-        model=ViewModelProvider(activity!!.viewModelStore,ViewModelProvider.NewInstanceFactory()).get(
-            MainViewModel::class.java)
+        model = ViewModelProvider(
+            activity!!.viewModelStore,
+            ViewModelProvider.NewInstanceFactory()
+        ).get(
+            MainViewModel::class.java
+        )
     }
 
     override fun onCreateView(
@@ -37,30 +44,42 @@ class ListFragment :Fragment(){
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        Log.e("log","onCreateView")
-        val binding=DataBindingUtil.inflate<FragmentListBinding>(inflater, R.layout.fragment_list,container,false)
-        binding.setVariable(com.example.myrealtrip.BR.vm,model)
+        val binding = DataBindingUtil.inflate<FragmentListBinding>(
+            inflater,
+            R.layout.fragment_list,
+            container,
+            false
+        )
+        binding.setVariable(com.example.myrealtrip.BR.vm, model)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        Log.e("log","onViewCreated")
-
-        refresh_view.setOnRefreshListener { model.requestData(url) }
-        recycler_view.addItemDecoration(DividerItemDecoration(this.context,LinearLayout.VERTICAL))
-        recycler_view.addOnScrollListener(object :RecyclerView.OnScrollListener(){
+        isNetworkConnected=checkInternet()
+        refresh_view.setOnRefreshListener {
+            isNetworkConnected=checkInternet()
+            if(isNetworkConnected)
+                model.requestData(url)
+        }
+        recycler_view.addItemDecoration(DividerItemDecoration(this.context, LinearLayout.VERTICAL))
+        recycler_view.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
-                val layoutManager=recyclerView.layoutManager as LinearLayoutManager
-                val itemCnt=layoutManager.itemCount
-                val lastItemIndex=layoutManager.findLastVisibleItemPosition()
-                if(!isLoading && lastItemIndex >= itemCnt-1 && model.isDataEnd.value==false){
-                    Log.e("log","more load!!")
-                    isLoading=true
-                    model.isLoading.postValue(true)
-                    model.continuation.value?.resume("Resumed")
+                val layoutManager = recyclerView.layoutManager as LinearLayoutManager
+                val itemCnt = layoutManager.itemCount
+                val lastItemIndex = layoutManager.findLastVisibleItemPosition()
+
+                if (!isLoading && lastItemIndex >= itemCnt - 1 && itemCnt!=0 && model.isDataEnd.value == false) {
+                    isNetworkConnected=checkInternet()
+                    if(isNetworkConnected) {
+                        Log.d("log", "more load!!")
+                        isLoading = true
+                        model.isLoading.postValue(true)
+                        model.continuation.value?.resume("Resumed")
+                    }
                 }
+
             }
         })
     }
@@ -69,14 +88,53 @@ class ListFragment :Fragment(){
         super.onActivityCreated(savedInstanceState)
 
         model.mList.observe(viewLifecycleOwner, Observer {
-            if(it.size==0) model.requestData(url)
+            if (it.size == 0 && isNetworkConnected) model.requestData(url)
             recycler_view.adapter?.notifyDataSetChanged()
         })
         model.isLoading.observe(viewLifecycleOwner, Observer {
-            refresh_view.isRefreshing=it
-            isLoading=it
+            refresh_view.isRefreshing = it
+            isLoading = it
         })
+    }
 
+    fun checkInternet():Boolean{
+        val isConnected=isInternetAvailable(this.context!!)
+        if(!isConnected) {
+            model.isLoading.postValue(false)
+            model.toastMsg.postValue("인터넷 연결상태를 확인해주세요.")
+        }
+        return isConnected
+    }
+
+    fun isInternetAvailable(context: Context): Boolean {
+        var result = false
+        val connectivityManager =
+            context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            val networkCapabilities = connectivityManager.activeNetwork ?: return false
+            val actNw =
+                connectivityManager.getNetworkCapabilities(networkCapabilities) ?: return false
+            result = when {
+                actNw.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> true
+                actNw.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> true
+                actNw.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> true
+                else -> false
+            }
+        } else {
+            connectivityManager.run {
+                connectivityManager.activeNetworkInfo?.run {
+                    result = when (type) {
+                        ConnectivityManager.TYPE_WIFI -> true
+                        ConnectivityManager.TYPE_MOBILE -> true
+                        ConnectivityManager.TYPE_ETHERNET -> true
+                        else -> false
+                    }
+
+                }
+            }
+        }
+
+        return result
     }
 
 }
